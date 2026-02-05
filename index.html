@@ -146,18 +146,18 @@
         }
 
         .hidden-settings {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 50px;
-            opacity: 0.05;
+            margin-top: 200px;
+            padding: 20px;
+            text-align: center;
         }
 
         .hidden-settings input {
-            width: 50px;
-            padding: 2px;
-            font-size: 10px;
-            border: 1px solid #eee;
+            width: 100px;
+            padding: 5px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
         }
     </style>
 </head>
@@ -183,8 +183,6 @@
         </div>
 
         <button class="flip-button" id="flipButton">Бросить монеты</button>
-
-        <div class="result" id="result" style="display: none;"></div>
 
         <div class="hidden-settings">
             <input type="number" id="specialNumber" min="1" value="3">
@@ -290,9 +288,6 @@
         }
 
         flipButton.addEventListener('click', () => {
-            flipButton.disabled = true;
-            resultDiv.style.display = 'none';
-
             // Анимация
             coinsContainer.innerHTML = `
                 <div class="coin">?</div>
@@ -309,31 +304,12 @@
                     `<div class="coin">${result === 'Орёл' ? '🦅' : result === 'Решка' ? '👑' : '⚡'}</div>`
                 ).join('');
 
-                // Анализ результата
-                const tailsCount = countTails(results);
-                const hasEdgeResult = hasEdge(results);
-                
-                let resultText = `Участник ${currentParticipant}: ${results.join(', ')}`;
-                
-                if (hasEdgeResult) {
-                    resultText += ' — Выпало ребро! ⚡';
-                } else if (tailsCount === 3) {
-                    resultText += ' — Три решки! 👑👑👑';
-                } else if (tailsCount === 2) {
-                    resultText += ' — Две решки! 👑👑';
-                }
-
-                resultDiv.textContent = resultText;
-                resultDiv.style.display = 'block';
-
                 // Переход к следующему участнику
                 currentParticipant++;
                 if (currentParticipant > totalParticipants) {
                     currentParticipant = 1;
                 }
                 updateCurrentTurn();
-
-                flipButton.disabled = false;
             }, 600);
         });
 
