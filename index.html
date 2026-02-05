@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>МОНЕТОЧКА ЭСКЛЮЗИВ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .settings {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .current-turn {
+            text-align: center;
+            font-size: 18px;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .coins-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            min-height: 120px;
+            align-items: center;
+        }
+
+        .coin {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            border: 4px solid #daa520;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #8b4513;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: flip 0.6s ease-in-out;
+        }
+
+        @keyframes flip {
+            0%, 100% { transform: rotateY(0deg); }
+            50% { transform: rotateY(180deg); }
+        }
+
+        .flip-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .flip-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .flip-button:active {
+            transform: translateY(0);
+        }
+
+        .flip-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f4ff;
+            border-radius: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .history {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
+        .history h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .history-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .special-turn {
+            border-left-color: #ff6b6b;
+            background: #fff5f5;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            color: #856404;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🪙 Бросок трёх монет</h1>
+        
+        <div class="settings">
+            <div class="input-group">
+                <label for="participants">Количество участников:</label>
+                <input type="number" id="participants" min="1" value="4">
+            </div>
+            <div class="input-group">
+                <label for="specialNumber">Особый номер:</label>
+                <input type="number" id="specialNumber" min="1" value="3">
+            </div>
+            <div class="warning">
+                ⚠️ Участнику с особым номером будет выпадать особый результат (2-3 решки или ребро)
+            </div>
+        </div>
+
+        <div class="current-turn" id="currentTurn">
+            Ход участника: 1
+        </div>
+
+        <div class="coins-container" id="coinsContainer">
+            <div class="coin">?</div>
+            <div class="coin">?</div>
+            <div class="coin">?</div>
+        </div>
+
+        <button class="flip-button" id="flipButton">Бросить монеты</button>
+
+        <div class="result" id="result" style="display: none;"></div>
+
+        <div class="history">
+            <h3>История бросков:</h3>
+            <div id="historyContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentParticipant = 1;
+        let totalParticipants = 4;
+        let specialNumber = 3;
+        let history = [];
+
+        const participantsInput = document.getElementById('participants');
+        const specialNumberInput = document.getElementById('specialNumber');
+        const flipButton = document.getElementById('flipButton');
+        const currentTurnDiv = document.getElementById('currentTurn');
+        const coinsContainer = document.getElementById('coinsContainer');
+        const resultDiv = document.getElementById('result');
+        const historyContainer = document.getElementById('historyContainer');
+
+        // Обновление настроек
+        participantsInput.addEventListener('change', () => {
+            totalParticipants = parseInt(participantsInput.value) || 1;
+            if (totalParticipants < 1) totalParticipants = 1;
+            participantsInput.value = totalParticipants;
+            currentParticipant = 1;
+            updateCurrentTurn();
+        });
+
+        specialNumberInput.addEventListener('change', () => {
+            specialNumber = parseInt(specialNumberInput.value) || 1;
+            if (specialNumber < 1) specialNumber = 1;
+            specialNumberInput.value = specialNumber;
+        });
+
+        function updateCurrentTurn() {
+            const isSpecial = currentParticipant === specialNumber;
+            currentTurnDiv.textContent = `Ход участника: ${currentParticipant}${isSpecial ? ' ⭐ (особый)' : ''}`;
+            currentTurnDiv.style.color = isSpecial ? '#ff6b6b' : '#667eea';
+        }
+
+        function getRandomCoinResult() {
+            const rand = Math.random();
+            if (rand < 0.49) return 'Орёл';
+            if (rand < 0.98) return 'Решка';
+            return 'Ребро';
+        }
+
+        function generateNormalResult() {
+            // Для обычных участников: не должно быть ребра и не должно быть 2-3 решек
+            let attempts = 0;
+            let results;
+            
+            do {
+                results = [
+                    Math.random() < 0.5 ? 'Орёл' : 'Решка',
+                    Math.random() < 0.5 ? 'Орёл' : 'Решка',
+                    Math.random() < 0.5 ? 'Орёл' : 'Решка'
+                ];
+                attempts++;
+            } while (countTails(results) >= 2 && attempts < 100);
+            
+            return results;
+        }
+
+        function generateSpecialResult() {
+            // Для особого участника: должно быть 2-3 решки ИЛИ хотя бы одно ребро
+            const choice = Math.random();
+            
+            if (choice < 0.5) {
+                // Вариант с ребром
+                const edgePosition = Math.floor(Math.random() * 3);
+                const results = ['Орёл', 'Орёл', 'Орёл'];
+                results[edgePosition] = 'Ребро';
+                
+                // Заполняем остальные позиции
+                for (let i = 0; i < 3; i++) {
+                    if (results[i] !== 'Ребро') {
+                        results[i] = Math.random() < 0.5 ? 'Орёл' : 'Решка';
+                    }
+                }
+                return results;
+            } else {
+                // Вариант с 2-3 решками
+                const tailsCount = Math.random() < 0.5 ? 2 : 3;
+                const results = ['Орёл', 'Орёл', 'Орёл'];
+                
+                // Расставляем решки
+                const positions = [0, 1, 2];
+                for (let i = 0; i < tailsCount; i++) {
+                    const randomIndex = Math.floor(Math.random() * positions.length);
+                    results[positions[randomIndex]] = 'Решка';
+                    positions.splice(randomIndex, 1);
+                }
+                
+                return results;
+            }
+        }
+
+        function countTails(results) {
+            return results.filter(r => r === 'Решка').length;
+        }
+
+        function hasEdge(results) {
+            return results.some(r => r === 'Ребро');
+        }
+
+        flipButton.addEventListener('click', () => {
+            flipButton.disabled = true;
+            resultDiv.style.display = 'none';
+
+            // Анимация
+            coinsContainer.innerHTML = `
+                <div class="coin">?</div>
+                <div class="coin">?</div>
+                <div class="coin">?</div>
+            `;
+
+            setTimeout(() => {
+                const isSpecialTurn = currentParticipant === specialNumber;
+                const results = isSpecialTurn ? generateSpecialResult() : generateNormalResult();
+
+                // Отображение результатов
+                coinsContainer.innerHTML = results.map(result => 
+                    `<div class="coin">${result === 'Орёл' ? '🦅' : result === 'Решка' ? '👑' : '⚡'}</div>`
+                ).join('');
+
+                // Анализ результата
+                const tailsCount = countTails(results);
+                const hasEdgeResult = hasEdge(results);
+                
+                let resultText = `Участник ${currentParticipant}: ${results.join(', ')}`;
+                
+                if (hasEdgeResult) {
+                    resultText += ' — Выпало ребро! ⚡';
+                } else if (tailsCount === 3) {
+                    resultText += ' — Три решки! 👑👑👑';
+                } else if (tailsCount === 2) {
+                    resultText += ' — Две решки! 👑👑';
+                }
+
+                resultDiv.textContent = resultText;
+                resultDiv.style.display = 'block';
+
+                // Добавление в историю
+                history.unshift({
+                    participant: currentParticipant,
+                    results: results,
+                    isSpecial: isSpecialTurn
+                });
+
+                updateHistory();
+
+                // Переход к следующему участнику
+                currentParticipant++;
+                if (currentParticipant > totalParticipants) {
+                    currentParticipant = 1;
+                }
+                updateCurrentTurn();
+
+                flipButton.disabled = false;
+            }, 600);
+        });
+
+        function updateHistory() {
+            historyContainer.innerHTML = history.slice(0, 10).map(item => {
+                const tailsCount = countTails(item.results);
+                const hasEdgeResult = hasEdge(item.results);
+                const emoji = item.results.map(r => 
+                    r === 'Орёл' ? '🦅' : r === 'Решка' ? '👑' : '⚡'
+                ).join(' ');
+                
+                return `<div class="history-item ${item.isSpecial ? 'special-turn' : ''}">
+                    <strong>Участник ${item.participant}${item.isSpecial ? ' ⭐' : ''}:</strong> ${emoji}
+                    ${hasEdgeResult ? ' <span style="color: #ff6b6b;">⚡ Ребро!</span>' : ''}
+                    ${tailsCount >= 2 ? ` <span style="color: #764ba2;">👑 ${tailsCount} решки</span>` : ''}
+                </div>`;
+            }).join('');
+        }
+
+        updateCurrentTurn();
+    </script>
+</body>
+</html>
